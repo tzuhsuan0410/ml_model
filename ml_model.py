@@ -54,7 +54,7 @@ if uploaded_file:
     st.write(f"### 資料預覽（顯示前 {num_rows} 筆）：", data.head(num_rows))
     
     # 資料前處理
-    data = preprocess_data(data)
+    data_cleaned = preprocess_data(data)
     num_rows_cleaned = st.slider("選擇要顯示的清理後資料筆數", min_value=1, max_value=len(data_cleaned), value=5, key="cleaned_slider")
     st.write(f"### 清理後的資料預覽（顯示前 {num_rows_cleaned} 筆）：", data_cleaned.head(num_rows_cleaned))
     
