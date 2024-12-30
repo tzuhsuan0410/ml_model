@@ -65,11 +65,13 @@ st.title("機器學習模型互動界面")
 uploaded_file = st.file_uploader("請上傳資料檔案 (CSV)", type=["csv"])
 if uploaded_file:
     data = pd.read_csv(uploaded_file)
-    st.write("### 資料預覽：", data.head())
+    num_rows = st.slider("選擇要顯示的筆數", min_value=1, max_value=len(data), value=5)
+    st.write(f"### 資料預覽（顯示前 {num_rows} 筆）：", data.head(num_rows))
     
     # 資料清理
-    data = preprocess_data(data)
-    st.write("### 清理後的資料：", data.head())
+    data_cleaned = preprocess_data(data)
+    num_rows_cleaned = st.slider("選擇要顯示的清理後資料筆數", min_value=1, max_value=len(data_cleaned), value=5, key="cleaned_slider")
+    st.write(f"### 清理後的資料預覽（顯示前 {num_rows_cleaned} 筆）：", data_cleaned.head(num_rows_cleaned))
     
     # 特徵與標籤選擇
     features = st.multiselect("選擇特徵欄位 (X)", options=data.columns)
