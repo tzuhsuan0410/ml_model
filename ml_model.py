@@ -57,7 +57,6 @@ if uploaded_file:
     data = preprocess_data(data)
     num_rows = st.slider("選擇要顯示的筆數", min_value=1, max_value=len(data), value=5)
     st.write(f"### 清理後的資料（顯示前 {num_rows} 筆）：", data.head(num_rows))
-    st.write("### 清理後的資料：", data.head())
     
     # 特徵與標籤選擇
     features = st.multiselect("選擇特徵欄位 (X)", options=data.columns)
