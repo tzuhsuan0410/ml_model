@@ -50,7 +50,8 @@ st.title("機器學習模型互動界面")
 uploaded_file = st.file_uploader("請上傳資料檔案 (CSV)", type=["csv"])
 if uploaded_file:
     data = pd.read_csv(uploaded_file)
-    st.write("### 資料預覽：", data.head())
+    num_rows = st.slider("選擇要顯示的筆數", min_value=1, max_value=len(data), value=5)
+    st.write(f"### 資料預覽（顯示前 {num_rows} 筆）：", data.head(num_rows))
     
     # 資料前處理
     data = preprocess_data(data)
