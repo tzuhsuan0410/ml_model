@@ -123,7 +123,6 @@ if uploaded_file:
     option = st.selectbox(
         "選擇一個功能",
         [
-            "Show data",
             "Plot Histogram",
             "Plot Boxplot",
             "Plot Scatter Plot",
@@ -132,11 +131,8 @@ if uploaded_file:
             "Convert into Categorical Variable"
         ]
     )
-
-    if option == "Show data":
-        show_data(data_cleaned)
-
-    elif option == "Plot Histogram":
+    
+    if option == "Plot Histogram":
         column = st.selectbox("選擇一個數值欄位", options=data_cleaned.select_dtypes(include=[np.number]).columns)
         if column:
             plot_histogram(data_cleaned, column)
