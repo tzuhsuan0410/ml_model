@@ -82,6 +82,19 @@ if uploaded_file:
         X = data[features]
         y = data[target]
         
+        # 確保目標值為數值型（尤其對回歸問題）
+        y = pd.to_numeric(y, errors="coerce").dropna()
+        
+        # 處理特徵值（移除非數值型欄位或進行 One-Hot Encoding）
+        X = pd.get_dummies(X, drop_first=True)
+        
+        # 填補空值（根據需要填補適當的值）
+        X = X.fillna(0)
+        y = y.fillna(y.mean())  # 回歸問題用平均值填補
+        
+        # 確保目標值 y 是一維數組
+        y = y.values.ravel()
+    
         # 問題類型選擇
         problem_type = st.radio(
             "選擇問題類型",
