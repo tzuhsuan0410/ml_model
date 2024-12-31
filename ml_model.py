@@ -112,22 +112,22 @@ if uploaded_file:
         
         # 訓練模型
         if st.button("開始訓練"):
-        model, result, predictions = train_model(X, y, model_type)
-        st.write(f"### {model_type} 訓練結果：{result}")
-
-        # 顯示對比表格
-        st.write("### 測試集預測 vs 真實值：")
-        comparison_df = pd.DataFrame({
-            "真實值": y_test.values if hasattr(y_test, 'values') else y_test,
-            "預測值": predictions
-        })
-        st.write(comparison_df.head(10))
-
-        # 添加下載功能
-        csv = comparison_df.to_csv(index=False).encode('utf-8')
-        st.download_button(
-            label="下載測試集預測結果",
-            data=csv,
-            file_name="predictions.csv",
-            mime="text/csv"
-        )
+            model, result, predictions = train_model(X, y, model_type)
+            st.write(f"### {model_type} 訓練結果：{result}")
+    
+            # 顯示對比表格
+            st.write("### 測試集預測 vs 真實值：")
+            comparison_df = pd.DataFrame({
+                "真實值": y_test.values if hasattr(y_test, 'values') else y_test,
+                "預測值": predictions
+            })
+            st.write(comparison_df.head(10))
+    
+            # 添加下載功能
+            csv = comparison_df.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="下載測試集預測結果",
+                data=csv,
+                file_name="predictions.csv",
+                mime="text/csv"
+            )
