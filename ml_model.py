@@ -112,7 +112,18 @@ if uploaded_file:
                 "真實值": y_test,
                 "預測值": predictions
             })
-            st.write(comparison_df.head(10))
+        
+            # 添加滑桿來選擇顯示的筆數
+            num_rows_result = st.slider(
+                "選擇要顯示的結果筆數",
+                min_value=1,
+                max_value=len(comparison_df),
+                value=10,
+                key="result_slider"
+            )
+            
+            # 顯示選擇的筆數
+            st.write(comparison_df.head(num_rows_result))
             
             # 添加下載功能
             csv = comparison_df.to_csv(index=False).encode('utf-8')
