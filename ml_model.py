@@ -10,6 +10,8 @@ from sklearn.metrics import accuracy_score, r2_score
 def preprocess_data(df):
     # 添加你的資料清理邏輯，例如處理缺失值或編碼分類變數
     df = df.dropna()  # 示例：刪除缺失值
+    if y.dtype == 'object':
+        y = y.astype('category').cat.codes
     return df
 
 # 機器學習模型訓練函數
@@ -81,16 +83,11 @@ if uploaded_file:
         X = data_cleaned[features]  # 使用清理後的資料
         y = data_cleaned[target]   # 使用清理後的目標值
         
-        # 處理目標欄位 y
-        y = y.dropna()  # 移除空值
-        if y.dtype == 'object':  # 若目標是字串，進行編碼
-            y = y.astype('category').cat.codes
-        y = y.values.ravel()  # 確保 y 是一維數組
-    
-        # 檢查資料資訊
-        st.write("X 的形狀：", X.shape)
-        st.write("y 的形狀：", y.shape)
-        st.write("y 的值（前 10 筆）：", y[:10])
+        # 確保目標值為數值型（尤其對回歸問題）
+        y = pd.to_numeric(y, errors="coerce").dropna()
+        
+        # 處理特徵值（移除非數值型欄位或進行 One-Hot Encoding）
+        X = pd.get_dummies(X, drop_first=True)
         
         # 確保目標值 y 是一維數組
         y = y.values.ravel()
