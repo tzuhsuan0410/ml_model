@@ -21,42 +21,42 @@ def train_model(X, y, model_type, test_size=0.2, random_state=42):
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
         accuracy = accuracy_score(y_test, y_pred)
-        return model, f"Accuracy: {accuracy:.2f}", y_pred, y_test
+        return model, f"Accuracy: {accuracy:.2f}"
     
     elif model_type == "Linear Regression":
         model = LinearRegression()
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
         r2 = r2_score(y_test, y_pred)
-        return model, f"R²: {r2:.2f}", y_pred, y_test
+        return model, f"R²: {r2:.2f}"
     
     elif model_type == "Random Forest Classifier":
         model = RandomForestClassifier(random_state=random_state)
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
         accuracy = accuracy_score(y_test, y_pred)
-        return model, f"Accuracy: {accuracy:.2f}", y_pred, y_test
+        return model, f"Accuracy: {accuracy:.2f}"
     
     elif model_type == "Random Forest Regressor":
         model = RandomForestRegressor(random_state=random_state)
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
         r2 = r2_score(y_test, y_pred)
-        return model, f"R²: {r2:.2f}", y_pred, y_test
+        return model, f"R²: {r2:.2f}"
     
     elif model_type == "Decision Tree Classifier":
         model = DecisionTreeClassifier(random_state=random_state)
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
         accuracy = accuracy_score(y_test, y_pred)
-        return model, f"Accuracy: {accuracy:.2f}", y_pred, y_test
+        return model, f"Accuracy: {accuracy:.2f}"
     
     elif model_type == "Decision Tree Regressor":
         model = DecisionTreeRegressor(random_state=random_state)
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
         r2 = r2_score(y_test, y_pred)
-        return model, f"R²: {r2:.2f}", y_pred, y_test
+        return model, f"R²: {r2:.2f}"
 
 # Streamlit 應用主體
 st.title("機器學習模型互動界面")
@@ -65,52 +65,26 @@ st.title("機器學習模型互動界面")
 uploaded_file = st.file_uploader("請上傳資料檔案 (CSV)", type=["csv"])
 if uploaded_file:
     data = pd.read_csv(uploaded_file)
-    num_rows = st.slider("選擇要顯示的筆數", min_value=1, max_value=len(data), value=5)
-    st.write(f"### 資料預覽（顯示前 {num_rows} 筆）：", data.head(num_rows))
+    st.write("### 資料預覽：", data.head())
     
     # 資料清理
-    data_cleaned = preprocess_data(data)
-    num_rows_cleaned = st.slider("選擇要顯示的清理後資料筆數", min_value=1, max_value=len(data_cleaned), value=5, key="cleaned_slider")
-    st.write(f"### 清理後的資料預覽（顯示前 {num_rows_cleaned} 筆）：", data_cleaned.head(num_rows_cleaned))
+    data = preprocess_data(data)
+    st.write("### 清理後的資料：", data.head())
     
     # 特徵與標籤選擇
     features = st.multiselect("選擇特徵欄位 (X)", options=data.columns)
     target = st.selectbox("選擇目標欄位 (y)", options=data.columns)
-
+    
     if features and target:
-        X = data_cleaned[features]
-        y = data_cleaned[target]
+        X = data[features]
+        y = data[target]
         
-        # 處理特徵值
-        categorical_features = X.select_dtypes(include=['object', 'category'])
-        categorical_features = pd.get_dummies(categorical_features, drop_first=True)
-        numerical_features = X.select_dtypes(exclude=['object', 'category'])
-        X = pd.concat([numerical_features, categorical_features], axis=1)
-        X = X.fillna(0)  # 填補空值
-    
-        # 檢查並處理空值
-        y = y.dropna()
-        X = X.loc[y.index]  # 對齊 X 和 y 的索引
-        if len(X) != len(y):
-            st.error("特徵和目標值行數不一致，請檢查資料！")
-            st.stop()
-    
         # 問題類型選擇
         problem_type = st.radio(
             "選擇問題類型",
             ["分類問題", "回歸問題"]
         )
-    
-        # 根據問題類型處理目標值
-        if problem_type == "分類問題":
-            if y.dtype == 'object' or y.dtype.name == 'category':
-                y = y.astype('category').cat.codes
-        elif problem_type == "回歸問題":
-            y = pd.to_numeric(y, errors="coerce").dropna()
         
-        # 確保目標值為一維數組
-        y = y.values.ravel()
-    
         # 根據問題類型顯示模型選項
         if problem_type == "分類問題":
             model_type = st.selectbox(
@@ -122,26 +96,8 @@ if uploaded_file:
                 "選擇機器學習模型",
                 ["Linear Regression", "Random Forest Regressor", "Decision Tree Regressor"]
             )
-
-
+        
         # 訓練模型
         if st.button("開始訓練"):
-            model, result, predictions, y_test = train_model(X, y, model_type)
+            model, result = train_model(X, y, model_type)
             st.write(f"### {model_type} 訓練結果：{result}")
-        
-            # 顯示對比表格
-            st.write("### 測試集預測 vs 真實值：")
-            comparison_df = pd.DataFrame({
-                "真實值": y_test,
-                "預測值": predictions
-            })
-            st.write(comparison_df.head(10))
-            
-            # 添加下載功能
-            csv = comparison_df.to_csv(index=False).encode('utf-8')
-            st.download_button(
-                label="下載測試集預測結果",
-                data=csv,
-                file_name="predictions.csv",
-                mime="text/csv"
-            )
