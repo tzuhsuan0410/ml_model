@@ -103,6 +103,8 @@ if uploaded_file:
         
         # 訓練模型
         if st.button("開始訓練"):
+            model, result, predictions, y_test = train_model(X, y, model_type)
+            st.write(f"### {model_type} 訓練結果：{result}")
             # 訓練模型並保存結果到 session_state
             model, result, predictions, y_test = train_model(X, y, model_type)
             st.session_state["model_result"] = result
