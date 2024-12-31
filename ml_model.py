@@ -114,14 +114,14 @@ if uploaded_file:
         
         # 訓練模型
         if st.button("開始訓練"):
-        model, result, predictions = train_model(X, y, model_type)
-        st.write(f"### {model_type} 訓練結果：{result}")
-        
-        # 顯示測試集預測與真實值對比
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-        st.write("### 測試集預測 vs 真實值：")
-        comparison_df = pd.DataFrame({
-            "真實值": y_test.values if hasattr(y_test, 'values') else y_test,
-            "預測值": predictions
-        })
-        st.write(comparison_df.head(10))  # 顯示前 10 筆
+            model, result, predictions = train_model(X, y, model_type)
+            st.write(f"### {model_type} 訓練結果：{result}")
+            
+            # 顯示測試集預測與真實值對比
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+            st.write("### 測試集預測 vs 真實值：")
+            comparison_df = pd.DataFrame({
+                "真實值": y_test.values if hasattr(y_test, 'values') else y_test,
+                "預測值": predictions
+            })
+            st.write(comparison_df.head(10))  # 顯示前 10 筆
