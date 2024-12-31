@@ -21,42 +21,42 @@ def train_model(X, y, model_type, test_size=0.2, random_state=42):
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
         accuracy = accuracy_score(y_test, y_pred)
-        return model, f"Accuracy: {accuracy:.2f}", y_pred
+        return model, f"Accuracy: {accuracy:.2f}", y_pred, y_test
     
     elif model_type == "Linear Regression":
         model = LinearRegression()
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
         r2 = r2_score(y_test, y_pred)
-        return model, f"R²: {r2:.2f}", y_pred
+        return model, f"R²: {r2:.2f}", y_pred, y_test
     
     elif model_type == "Random Forest Classifier":
         model = RandomForestClassifier(random_state=random_state)
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
         accuracy = accuracy_score(y_test, y_pred)
-        return model, f"Accuracy: {accuracy:.2f}", y_pred
+        return model, f"Accuracy: {accuracy:.2f}", y_pred, y_test
     
     elif model_type == "Random Forest Regressor":
         model = RandomForestRegressor(random_state=random_state)
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
         r2 = r2_score(y_test, y_pred)
-        return model, f"R²: {r2:.2f}", y_pred
+        return model, f"R²: {r2:.2f}", y_pred, y_test
     
     elif model_type == "Decision Tree Classifier":
         model = DecisionTreeClassifier(random_state=random_state)
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
         accuracy = accuracy_score(y_test, y_pred)
-        return model, f"Accuracy: {accuracy:.2f}", y_pred
+        return model, f"Accuracy: {accuracy:.2f}", y_pred, y_test
     
     elif model_type == "Decision Tree Regressor":
         model = DecisionTreeRegressor(random_state=random_state)
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
         r2 = r2_score(y_test, y_pred)
-        return model, f"R²: {r2:.2f}", y_pred
+        return model, f"R²: {r2:.2f}", y_pred, y_test
 
 # Streamlit 應用主體
 st.title("機器學習模型互動界面")
@@ -80,7 +80,7 @@ if uploaded_file:
     if features and target:
         X = data_cleaned[features]
         y = data_cleaned[target]
-    
+        
         # 處理特徵值
         categorical_features = X.select_dtypes(include=['object', 'category'])
         categorical_features = pd.get_dummies(categorical_features, drop_first=True)
@@ -90,6 +90,7 @@ if uploaded_file:
     
         # 檢查並處理空值
         y = y.dropna()
+        X = X.loc[y.index]  # 對齊 X 和 y 的索引
         if len(X) != len(y):
             st.error("特徵和目標值行數不一致，請檢查資料！")
             st.stop()
@@ -106,13 +107,9 @@ if uploaded_file:
                 y = y.astype('category').cat.codes
         elif problem_type == "回歸問題":
             y = pd.to_numeric(y, errors="coerce").dropna()
-    
+        
         # 確保目標值為一維數組
         y = y.values.ravel()
-    
-        # 確認資料形狀與類型
-        st.write("特徵資料 X 的形狀：", X.shape)
-        st.write("目標資料 y 的形狀：", y.shape)
     
         # 根據問題類型顯示模型選項
         if problem_type == "分類問題":
@@ -129,17 +126,17 @@ if uploaded_file:
 
         # 訓練模型
         if st.button("開始訓練"):
-            model, result, predictions = train_model(X, y, model_type)
+            model, result, predictions, y_test = train_model(X, y, model_type)
             st.write(f"### {model_type} 訓練結果：{result}")
-    
+        
             # 顯示對比表格
             st.write("### 測試集預測 vs 真實值：")
             comparison_df = pd.DataFrame({
-                "真實值": y_test.values if hasattr(y_test, 'values') else y_test,
+                "真實值": y_test,
                 "預測值": predictions
             })
             st.write(comparison_df.head(10))
-    
+            
             # 添加下載功能
             csv = comparison_df.to_csv(index=False).encode('utf-8')
             st.download_button(
