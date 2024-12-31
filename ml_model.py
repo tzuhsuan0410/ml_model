@@ -103,14 +103,21 @@ if uploaded_file:
         
         # 訓練模型
         if st.button("開始訓練"):
+            # 訓練模型並保存結果到 session_state
             model, result, predictions, y_test = train_model(X, y, model_type)
-            st.write(f"### {model_type} 訓練結果：{result}")
+            st.session_state["model_result"] = result
+            st.session_state["predictions"] = predictions
+            st.session_state["y_test"] = y_test
+        
+        # 確保模型已經訓練過
+        if "model_result" in st.session_state:
+            st.write(f"### {model_type} 訓練結果：{st.session_state['model_result']}")
         
             # 顯示對比表格
             st.write("### 測試集預測 vs 真實值：")
             comparison_df = pd.DataFrame({
-                "真實值": y_test,
-                "預測值": predictions
+                "真實值": st.session_state["y_test"],
+                "預測值": st.session_state["predictions"]
             })
         
             # 添加滑桿來選擇顯示的筆數
