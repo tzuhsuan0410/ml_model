@@ -80,10 +80,6 @@ if uploaded_file:
     if features and target:
         X = data_cleaned[features]  # 使用清理後的資料
         y = data_cleaned[target]   # 使用清理後的目標值
-        
-        if problem_type == "分類問題":
-            if y.dtype == 'object':
-                y = y.astype('category').cat.codes
 
         # 處理特徵值
         X = pd.get_dummies(X.select_dtypes(include=['object', 'category']), drop_first=True)
@@ -97,7 +93,11 @@ if uploaded_file:
             "選擇問題類型",
             ["分類問題", "回歸問題"]
         )
-        
+
+        if problem_type == "分類問題":
+            if y.dtype == 'object':
+                y = y.astype('category').cat.codes
+
         # 根據問題類型顯示模型選項
         if problem_type == "分類問題":
             model_type = st.selectbox(
