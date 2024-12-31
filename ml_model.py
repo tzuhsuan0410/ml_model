@@ -10,13 +10,13 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.metrics import accuracy_score, r2_score
 
-# 資料前處理函數
+# Data preprocessing function
 def preprocess_data(df):
-    # 添加你的資料清理邏輯，例如處理缺失值或編碼分類變數
-    df = df.dropna()  # 示例：刪除缺失值
+    # Add your data cleaning logic, e.g., handling missing values or encoding categorical variables
+    df = df.dropna()  # Example: Drop missing values
     return df
 
-# 機器學習模型訓練函數
+# Machine learning model training function
 def train_model(X, y, model_type, test_size=0.2, random_state=42):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
     
@@ -62,66 +62,65 @@ def train_model(X, y, model_type, test_size=0.2, random_state=42):
         r2 = r2_score(y_test, y_pred)
         return model, f"R²: {r2:.2f}", y_pred, y_test
 
-# 功能選項函數
+# Feature option functions
 def plot_histogram(data, column):
-    st.write(f"### {column} 的直方圖")
+    st.write(f"### Histogram of {column}")
     plt.figure(figsize=(10, 5))
     sns.histplot(data[column], kde=True)
     st.pyplot(plt)
 
 def plot_boxplot(data, column):
-    st.write(f"### {column} 的盒狀圖")
+    st.write(f"### Boxplot of {column}")
     plt.figure(figsize=(10, 5))
     sns.boxplot(data[column])
     st.pyplot(plt)
 
 def plot_scatter(data, col1, col2):
-    st.write(f"### {col1} vs {col2} 的散點圖")
+    st.write(f"### Scatter Plot of {col1} vs {col2}")
     plt.figure(figsize=(10, 5))
     sns.scatterplot(x=data[col1], y=data[col2])
     st.pyplot(plt)
 
 def plot_heatmap(data):
-    st.write("### 熱力圖")
+    st.write("### Heatmap")
     plt.figure(figsize=(10, 8))
     sns.heatmap(data.corr(), annot=True, cmap='coolwarm', fmt=".2f")
     st.pyplot(plt)
 
 def calculate_vif(data):
-    st.write("### VIF 指標計算")
+    st.write("### VIF Calculation")
     vif_data = pd.DataFrame()
     vif_data["Feature"] = data.columns
     vif_data["VIF"] = [variance_inflation_factor(data.values, i) for i in range(data.shape[1])]
     st.write(vif_data)
 
 def convert_to_categorical(data, column):
-    st.write(f"### 將 {column} 轉換為類別型變數")
+    st.write(f"### Converting {column} to Categorical")
     data[column] = data[column].astype('category')
     st.write(data[column].head())
 
 def show_data(data):
-    st.write("### 資料預覽")
+    st.write("### Data Preview")
     st.write(data.head())
 
-# Streamlit 應用主體
-st.title("機器學習模型互動界面")
+# Streamlit Application Main
+title = st.title("Interactive Machine Learning Interface")
 
-# 上傳檔案
-uploaded_file = st.file_uploader("請上傳資料檔案 (CSV)", type=["csv"])
+# Upload File
+uploaded_file = st.file_uploader("Upload CSV File", type=["csv"])
 if uploaded_file:
     data = pd.read_csv(uploaded_file)
-    num_rows = st.slider("選擇要顯示的筆數", min_value=1, max_value=len(data), value=5)
-    st.write(f"### 資料預覽（顯示前 {num_rows} 筆）：", data.head(num_rows))
+    num_rows = st.slider("Select number of rows to display", min_value=1, max_value=len(data), value=5)
+    st.write(f"### Data Preview (First {num_rows} rows):", data.head(num_rows))
     
-    # 資料清理
+    # Data Cleaning
     data_cleaned = preprocess_data(data)
-    num_rows_cleaned = st.slider("選擇要顯示的清理後資料筆數", min_value=1, max_value=len(data_cleaned), value=5, key="cleaned_slider")
-    st.write(f"### 清理後的資料預覽（顯示前 {num_rows_cleaned} 筆）：", data_cleaned.head(num_rows_cleaned))
+    num_rows_cleaned = st.slider("Select number of rows to display (after cleaning)", min_value=1, max_value=len(data_cleaned), value=5, key="cleaned_slider")
+    st.write(f"### Data Preview After Cleaning (First {num_rows_cleaned} rows):", data_cleaned.head(num_rows_cleaned))
 
-
-    # 功能選項
+    # Feature Selection
     option = st.selectbox(
-        "選擇一個功能",
+        "Select a Feature",
         [
             "Plot Histogram",
             "Plot Boxplot",
@@ -133,18 +132,18 @@ if uploaded_file:
     )
     
     if option == "Plot Histogram":
-        column = st.selectbox("選擇一個數值欄位", options=data_cleaned.select_dtypes(include=[np.number]).columns)
+        column = st.selectbox("Select a Numerical Column", options=data_cleaned.select_dtypes(include=[np.number]).columns)
         if column:
             plot_histogram(data_cleaned, column)
 
     elif option == "Plot Boxplot":
-        column = st.selectbox("選擇一個數值欄位", options=data_cleaned.select_dtypes(include=[np.number]).columns)
+        column = st.selectbox("Select a Numerical Column", options=data_cleaned.select_dtypes(include=[np.number]).columns)
         if column:
             plot_boxplot(data_cleaned, column)
 
     elif option == "Plot Scatter Plot":
-        col1 = st.selectbox("選擇 X 軸數值欄位", options=data_cleaned.select_dtypes(include=[np.number]).columns)
-        col2 = st.selectbox("選擇 Y 軸數值欄位", options=data_cleaned.select_dtypes(include=[np.number]).columns)
+        col1 = st.selectbox("Select X-axis Numerical Column", options=data_cleaned.select_dtypes(include=[np.number]).columns)
+        col2 = st.selectbox("Select Y-axis Numerical Column", options=data_cleaned.select_dtypes(include=[np.number]).columns)
         if col1 and col2:
             plot_scatter(data_cleaned, col1, col2)
 
@@ -155,14 +154,13 @@ if uploaded_file:
         calculate_vif(data_cleaned.select_dtypes(include=[np.number]))
 
     elif option == "Convert into Categorical Variable":
-        column = st.selectbox("選擇一個欄位", options=data_cleaned.columns)
+        column = st.selectbox("Select a Column", options=data_cleaned.columns)
         if column:
             convert_to_categorical(data_cleaned, column)
 
-    
-    # 特徵與標籤選擇
-    features = st.multiselect("選擇特徵欄位 (X)", options=data_cleaned.columns)
-    target = st.selectbox("選擇目標欄位 (y)", options=data_cleaned.columns)
+    # Features and Target Selection
+    features = st.multiselect("Select Feature Columns (X)", options=data_cleaned.columns)
+    target = st.selectbox("Select Target Column (y)", options=data_cleaned.columns)
     
     if features and target:
         X = data_cleaned[features]
@@ -170,48 +168,43 @@ if uploaded_file:
 
         X = pd.get_dummies(X, drop_first=True)
         
-        # 問題類型選擇
+        # Problem Type Selection
         problem_type = st.radio(
-            "選擇問題類型",
-            ["分類問題", "回歸問題"]
+            "Select Problem Type",
+            ["Classification", "Regression"]
         )
         
-        # 根據問題類型顯示模型選項
-        if problem_type == "分類問題":
+        # Model Selection
+        if problem_type == "Classification":
             model_type = st.selectbox(
-                "選擇機器學習模型",
+                "Select Machine Learning Model",
                 ["Logistic Regression", "Random Forest Classifier", "Decision Tree Classifier"]
             )
         else:
             model_type = st.selectbox(
-                "選擇機器學習模型",
+                "Select Machine Learning Model",
                 ["Linear Regression", "Random Forest Regressor", "Decision Tree Regressor"]
             )
         
-        # 訓練模型
-        if st.button("開始訓練"):
+        # Train Model
+        if st.button("Train Model"):
             model, result, predictions, y_test = train_model(X, y, model_type)
-            st.write(f"### {model_type} 訓練結果：{result}")
-            # 訓練模型並保存結果到 session_state
-            model, result, predictions, y_test = train_model(X, y, model_type)
-            st.session_state["model_result"] = result
-            st.session_state["predictions"] = predictions
-            st.session_state["y_test"] = y_test
-        
-            # 顯示對比表格
-            st.write("### 測試集預測 vs 真實值：")
+            st.write(f"### {model_type} Training Result: {result}")
+            
+            # Show Comparison Table
+            st.write("### Test Set Predictions vs True Values:")
             comparison_df = pd.DataFrame({
-                "真實值": st.session_state["y_test"],
-                "預測值": st.session_state["predictions"]
+                "True Values": y_test,
+                "Predicted Values": predictions
             })
-        
-            # 顯示所有結果
+            
+            # Display All Results
             st.write(comparison_df)
-        
-            # 添加下載功能
+            
+            # Add Download Button
             csv = comparison_df.to_csv(index=False).encode('utf-8')
             st.download_button(
-                label="下載測試集預測結果",
+                label="Download Test Set Predictions",
                 data=csv,
                 file_name="predictions.csv",
                 mime="text/csv"
