@@ -81,17 +81,16 @@ if uploaded_file:
         X = data_cleaned[features]  # 使用清理後的資料
         y = data_cleaned[target]   # 使用清理後的目標值
         
-        # 確保目標值為數值型（尤其對回歸問題）
-        y = pd.to_numeric(y, errors="coerce").dropna()
-        
-        # 處理特徵值（移除非數值型欄位或進行 One-Hot Encoding）
-        X = pd.get_dummies(X, drop_first=True)
-        
-        # 確保目標值 y 是一維數組
-        y = y.values.ravel()
+        if problem_type == "分類問題":
+            if y.dtype == 'object':
+                y = y.astype('category').cat.codes
 
-        if y.dtype == 'object':
-            y = y.astype('category').cat.codes
+        # 處理特徵值
+        X = pd.get_dummies(X.select_dtypes(include=['object', 'category']), drop_first=True)
+        X = X.join(data_cleaned[features].select_dtypes(exclude=['object', 'category']))
+    
+        # 確保目標值為一維數組
+        y = y.values.ravel()
     
         # 問題類型選擇
         problem_type = st.radio(
@@ -113,14 +112,22 @@ if uploaded_file:
         
         # 訓練模型
         if st.button("開始訓練"):
-            model, result, predictions = train_model(X, y, model_type)
-            st.write(f"### {model_type} 訓練結果：{result}")
-            
-            # 顯示測試集預測與真實值對比
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-            st.write("### 測試集預測 vs 真實值：")
-            comparison_df = pd.DataFrame({
-                "真實值": y_test.values if hasattr(y_test, 'values') else y_test,
-                "預測值": predictions
-            })
-            st.write(comparison_df.head(10))  # 顯示前 10 筆
+        model, result, predictions = train_model(X, y, model_type)
+        st.write(f"### {model_type} 訓練結果：{result}")
+
+        # 顯示對比表格
+        st.write("### 測試集預測 vs 真實值：")
+        comparison_df = pd.DataFrame({
+            "真實值": y_test.values if hasattr(y_test, 'values') else y_test,
+            "預測值": predictions
+        })
+        st.write(comparison_df.head(10))
+
+        # 添加下載功能
+        csv = comparison_df.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="下載測試集預測結果",
+            data=csv,
+            file_name="predictions.csv",
+            mime="text/csv"
+        )
