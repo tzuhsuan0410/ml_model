@@ -80,6 +80,8 @@ if uploaded_file:
     if features and target:
         X = data_cleaned[features]
         y = data_cleaned[target]
+
+        X = pd.get_dummies(X, drop_first=True)
         
         # 問題類型選擇
         problem_type = st.radio(
