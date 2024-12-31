@@ -126,6 +126,7 @@ if uploaded_file:
                 ["Linear Regression", "Random Forest Regressor", "Decision Tree Regressor"]
             )
 
+
         # 訓練模型
         if st.button("開始訓練"):
             model, result, predictions = train_model(X, y, model_type)
