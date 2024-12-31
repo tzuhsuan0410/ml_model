@@ -21,42 +21,42 @@ def train_model(X, y, model_type, test_size=0.2, random_state=42):
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
         accuracy = accuracy_score(y_test, y_pred)
-        return model, f"Accuracy: {accuracy:.2f}"
+        return model, f"Accuracy: {accuracy:.2f}", y_pred, y_test
     
     elif model_type == "Linear Regression":
         model = LinearRegression()
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
         r2 = r2_score(y_test, y_pred)
-        return model, f"R²: {r2:.2f}"
+        return model, f"R²: {r2:.2f}", y_pred, y_test
     
     elif model_type == "Random Forest Classifier":
         model = RandomForestClassifier(random_state=random_state)
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
         accuracy = accuracy_score(y_test, y_pred)
-        return model, f"Accuracy: {accuracy:.2f}"
+        return model, f"Accuracy: {accuracy:.2f}", y_pred, y_test
     
     elif model_type == "Random Forest Regressor":
         model = RandomForestRegressor(random_state=random_state)
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
         r2 = r2_score(y_test, y_pred)
-        return model, f"R²: {r2:.2f}"
+        return model, f"R²: {r2:.2f}", y_pred, y_test
     
     elif model_type == "Decision Tree Classifier":
         model = DecisionTreeClassifier(random_state=random_state)
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
         accuracy = accuracy_score(y_test, y_pred)
-        return model, f"Accuracy: {accuracy:.2f}"
+        return model, f"Accuracy: {accuracy:.2f}", y_pred, y_test
     
     elif model_type == "Decision Tree Regressor":
         model = DecisionTreeRegressor(random_state=random_state)
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
         r2 = r2_score(y_test, y_pred)
-        return model, f"R²: {r2:.2f}"
+        return model, f"R²: {r2:.2f}", y_pred, y_test
 
 # Streamlit 應用主體
 st.title("機器學習模型互動界面")
@@ -103,5 +103,22 @@ if uploaded_file:
         
         # 訓練模型
         if st.button("開始訓練"):
-            model, result = train_model(X, y, model_type)
+            model, result, predictions, y_test = train_model(X, y, model_type)
             st.write(f"### {model_type} 訓練結果：{result}")
+        
+            # 顯示對比表格
+            st.write("### 測試集預測 vs 真實值：")
+            comparison_df = pd.DataFrame({
+                "真實值": y_test,
+                "預測值": predictions
+            })
+            st.write(comparison_df.head(10))
+            
+            # 添加下載功能
+            csv = comparison_df.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="下載測試集預測結果",
+                data=csv,
+                file_name="predictions.csv",
+                mime="text/csv"
+            )
