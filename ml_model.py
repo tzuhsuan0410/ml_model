@@ -135,7 +135,7 @@ if uploaded_file:
             # 添加下載功能
             csv = comparison_df.to_csv(index=False).encode('utf-8')
             st.download_button(
-                label="下載測試集預測結果",
+                label="下載完整測試集預測結果",
                 data=csv,
                 file_name="predictions.csv",
                 mime="text/csv"
