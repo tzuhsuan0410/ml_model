@@ -76,28 +76,44 @@ if uploaded_file:
     # 特徵與標籤選擇
     features = st.multiselect("選擇特徵欄位 (X)", options=data.columns)
     target = st.selectbox("選擇目標欄位 (y)", options=data.columns)
-    
-    if features and target:
-        X = data_cleaned[features]  # 使用清理後的資料
-        y = data_cleaned[target]   # 使用清理後的目標值
 
-        # 處理特徵值
-        X = pd.get_dummies(X.select_dtypes(include=['object', 'category']), drop_first=True)
-        X = X.join(data_cleaned[features].select_dtypes(exclude=['object', 'category']))
+    if features and target:
+        X = data_cleaned[features]
+        y = data_cleaned[target]
     
-        # 確保目標值為一維數組
-        y = y.values.ravel()
+        # 處理特徵值
+        categorical_features = X.select_dtypes(include=['object', 'category'])
+        categorical_features = pd.get_dummies(categorical_features, drop_first=True)
+        numerical_features = X.select_dtypes(exclude=['object', 'category'])
+        X = pd.concat([numerical_features, categorical_features], axis=1)
+        X = X.fillna(0)  # 填補空值
+    
+        # 檢查並處理空值
+        y = y.dropna()
+        if len(X) != len(y):
+            st.error("特徵和目標值行數不一致，請檢查資料！")
+            st.stop()
     
         # 問題類型選擇
         problem_type = st.radio(
             "選擇問題類型",
             ["分類問題", "回歸問題"]
         )
-
+    
+        # 根據問題類型處理目標值
         if problem_type == "分類問題":
-            if y.dtype == 'object':
+            if y.dtype == 'object' or y.dtype.name == 'category':
                 y = y.astype('category').cat.codes
-
+        elif problem_type == "回歸問題":
+            y = pd.to_numeric(y, errors="coerce").dropna()
+    
+        # 確保目標值為一維數組
+        y = y.values.ravel()
+    
+        # 確認資料形狀與類型
+        st.write("特徵資料 X 的形狀：", X.shape)
+        st.write("目標資料 y 的形狀：", y.shape)
+    
         # 根據問題類型顯示模型選項
         if problem_type == "分類問題":
             model_type = st.selectbox(
@@ -109,7 +125,7 @@ if uploaded_file:
                 "選擇機器學習模型",
                 ["Linear Regression", "Random Forest Regressor", "Decision Tree Regressor"]
             )
-        
+
         # 訓練模型
         if st.button("開始訓練"):
             model, result, predictions = train_model(X, y, model_type)
