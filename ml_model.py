@@ -10,6 +10,7 @@ from sklearn.metrics import accuracy_score, r2_score
 def preprocess_data(df):
     # 添加你的資料清理邏輯，例如處理缺失值或編碼分類變數
     df = df.dropna()  # 示例：刪除缺失值
+    df = pd.get_dummies(df, drop_first=True)
     return df
 
 # 機器學習模型訓練函數
