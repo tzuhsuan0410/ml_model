@@ -109,10 +109,6 @@ if uploaded_file:
             st.session_state["predictions"] = predictions
             st.session_state["y_test"] = y_test
         
-        # 確保模型已經訓練過
-        if "model_result" in st.session_state:
-            st.write(f"### {model_type} 訓練結果：{st.session_state['model_result']}")
-        
             # 顯示對比表格
             st.write("### 測試集預測 vs 真實值：")
             comparison_df = pd.DataFrame({
