@@ -58,6 +58,47 @@ def train_model(X, y, model_type, test_size=0.2, random_state=42):
         r2 = r2_score(y_test, y_pred)
         return model, f"R²: {r2:.2f}", y_pred, y_test
 
+# 功能選項函數
+def plot_histogram(data, column):
+    st.write(f"### {column} 的直方圖")
+    plt.figure(figsize=(10, 5))
+    sns.histplot(data[column], kde=True)
+    st.pyplot(plt)
+
+def plot_boxplot(data, column):
+    st.write(f"### {column} 的盒狀圖")
+    plt.figure(figsize=(10, 5))
+    sns.boxplot(data[column])
+    st.pyplot(plt)
+
+def plot_scatter(data, col1, col2):
+    st.write(f"### {col1} vs {col2} 的散點圖")
+    plt.figure(figsize=(10, 5))
+    sns.scatterplot(x=data[col1], y=data[col2])
+    st.pyplot(plt)
+
+def plot_heatmap(data):
+    st.write("### 熱力圖")
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(data.corr(), annot=True, cmap='coolwarm', fmt=".2f")
+    st.pyplot(plt)
+
+def calculate_vif(data):
+    st.write("### VIF 指標計算")
+    vif_data = pd.DataFrame()
+    vif_data["Feature"] = data.columns
+    vif_data["VIF"] = [variance_inflation_factor(data.values, i) for i in range(data.shape[1])]
+    st.write(vif_data)
+
+def convert_to_categorical(data, column):
+    st.write(f"### 將 {column} 轉換為類別型變數")
+    data[column] = data[column].astype('category')
+    st.write(data[column].head())
+
+def show_data(data):
+    st.write("### 資料預覽")
+    st.write(data.head())
+
 # Streamlit 應用主體
 st.title("機器學習模型互動界面")
 
@@ -72,10 +113,56 @@ if uploaded_file:
     data_cleaned = preprocess_data(data)
     num_rows_cleaned = st.slider("選擇要顯示的清理後資料筆數", min_value=1, max_value=len(data_cleaned), value=5, key="cleaned_slider")
     st.write(f"### 清理後的資料預覽（顯示前 {num_rows_cleaned} 筆）：", data_cleaned.head(num_rows_cleaned))
+
+
+    # 功能選項
+    option = st.selectbox(
+        "選擇一個功能",
+        [
+            "Show data",
+            "Plot Histogram",
+            "Plot Boxplot",
+            "Plot Scatter Plot",
+            "Plot Heatmap",
+            "Calculate VIF",
+            "Convert into Categorical Variable"
+        ]
+    )
+
+    if option == "Show data":
+        show_data(data_cleaned)
+
+    elif option == "Plot Histogram":
+        column = st.selectbox("選擇一個數值欄位", options=data_cleaned.select_dtypes(include=[np.number]).columns)
+        if column:
+            plot_histogram(data_cleaned, column)
+
+    elif option == "Plot Boxplot":
+        column = st.selectbox("選擇一個數值欄位", options=data_cleaned.select_dtypes(include=[np.number]).columns)
+        if column:
+            plot_boxplot(data_cleaned, column)
+
+    elif option == "Plot Scatter Plot":
+        col1 = st.selectbox("選擇 X 軸數值欄位", options=data_cleaned.select_dtypes(include=[np.number]).columns)
+        col2 = st.selectbox("選擇 Y 軸數值欄位", options=data_cleaned.select_dtypes(include=[np.number]).columns)
+        if col1 and col2:
+            plot_scatter(data_cleaned, col1, col2)
+
+    elif option == "Plot Heatmap":
+        plot_heatmap(data_cleaned.select_dtypes(include=[np.number]))
+
+    elif option == "Calculate VIF":
+        calculate_vif(data_cleaned.select_dtypes(include=[np.number]))
+
+    elif option == "Convert into Categorical Variable":
+        column = st.selectbox("選擇一個欄位", options=data_cleaned.columns)
+        if column:
+            convert_to_categorical(data_cleaned, column)
+
     
     # 特徵與標籤選擇
-    features = st.multiselect("選擇特徵欄位 (X)", options=data.columns)
-    target = st.selectbox("選擇目標欄位 (y)", options=data.columns)
+    features = st.multiselect("選擇特徵欄位 (X)", options=data_cleaned.columns)
+    target = st.selectbox("選擇目標欄位 (y)", options=data_cleaned.columns)
     
     if features and target:
         X = data_cleaned[features]
