@@ -103,40 +103,31 @@ if uploaded_file:
         
         # 訓練模型
         if st.button("開始訓練"):
-            # 訓練模型並保存結果到 session_state
-            model, result, predictions, y_test = train_model(X, y, model_type)
-            st.session_state["model_result"] = result
-            st.session_state["predictions"] = predictions
-            st.session_state["y_test"] = y_test
-        
-        # 確保模型已經訓練過
-        if "model_result" in st.session_state:
-            st.write(f"### {model_type} 訓練結果：{st.session_state['model_result']}")
-        
-            # 顯示對比表格
-            st.write("### 測試集預測 vs 真實值：")
-            comparison_df = pd.DataFrame({
-                "真實值": st.session_state["y_test"],
-                "預測值": st.session_state["predictions"]
-            })
-        
-            # 添加滑桿來選擇顯示的筆數
-            num_rows_result = st.slider(
-                "選擇要顯示的結果筆數",
-                min_value=1,
-                max_value=len(comparison_df),
-                value=10,
-                key="result_slider"
-            )
-            
-            # 顯示選擇的筆數
-            st.write(comparison_df.head(num_rows_result))
-            
-            # 添加下載功能
-            csv = comparison_df.to_csv(index=False).encode('utf-8')
-            st.download_button(
-                label="下載完整測試集預測結果",
-                data=csv,
-                file_name="predictions.csv",
-                mime="text/csv"
-            )
+        # 訓練模型並保存結果到 session_state
+        model, result, predictions, y_test = train_model(X, y, model_type)
+        st.session_state["model_result"] = result
+        st.session_state["predictions"] = predictions
+        st.session_state["y_test"] = y_test
+    
+    # 確保模型已經訓練過
+    if "model_result" in st.session_state:
+        st.write(f"### {model_type} 訓練結果：{st.session_state['model_result']}")
+    
+        # 顯示對比表格
+        st.write("### 測試集預測 vs 真實值：")
+        comparison_df = pd.DataFrame({
+            "真實值": st.session_state["y_test"],
+            "預測值": st.session_state["predictions"]
+        })
+    
+        # 顯示所有結果
+        st.write(comparison_df)
+    
+        # 添加下載功能
+        csv = comparison_df.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="下載測試集預測結果",
+            data=csv,
+            file_name="predictions.csv",
+            mime="text/csv"
+        )
