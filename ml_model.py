@@ -120,7 +120,7 @@ if uploaded_file:
 
     # Feature Selection
     option = st.selectbox(
-        "Select a Feature",
+        "Select a Option",
         [
             "Plot Histogram",
             "Plot Boxplot",
