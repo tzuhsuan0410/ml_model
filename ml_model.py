@@ -192,7 +192,7 @@ if uploaded_file:
             st.write(f"### {model_type} Training Result: {result}")
             
             # Show Comparison Table
-            st.write("### Test Set Predictions vs True Values:")
+            st.write("### True Values vs Predicted Values:")
             comparison_df = pd.DataFrame({
                 "True Values": y_test,
                 "Predicted Values": predictions
